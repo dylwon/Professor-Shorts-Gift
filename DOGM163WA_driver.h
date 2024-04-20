@@ -10,12 +10,14 @@
 //
 // This program configures SPI communication between the AVR128DB48 and the
 // Display on Glass LCD screen (DOG LCD).
-// The pins for SPI are listed below:
-// PA4 for MOSI
-// PA6 for SCK
-// PA7 for /SS
-// PA5 for MISO
-// PC0 for RS of LCD
+// The SPI pins for the LCD display are listed as follows:
+// MOSI -> PA4
+// MISO -> PA5
+// SCK -> PA6
+// /SS0 -> PB0
+// /SS1 -> PB1
+// RS0 -> PC0
+// RS1 -> PC1
 //
 // Warnings :
 // Restrictions : none
@@ -306,24 +308,17 @@ void update_lcd_dog(void) {
 
 //***************************************************************************
 //
-// Function Name : void insert_split_msg(char* message)
-// Date : 4/19/2024
+// Function Name : int sizeof_array(char* array) & int sizeof_matrix(char** matrix)
+// Date : 4/20/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
 // Target Hardware : AVR128DB48
-// Author : Kenneth Short
+// Author : Dylan Wong
 //
+// These functions help calculate the sizes of each dimension in an array or matrix
 //
-//
-// Warnings : 
-// Restrictions : none
-// Algorithms : 
-// References : none
-//
-// Revision History : Initial version
-//
-//************************************************************************** 
- 
+//**************************************************************************
+
 int sizeof_array(char* array) {
 	int size = 0;
 	while (array[size] != '\0') { size++; }
@@ -335,6 +330,32 @@ int sizeof_matrix(char** matrix) {
 	while (matrix[size] != NULL) { size++; }
 	return size;
 }
+
+//***************************************************************************
+//
+// Function Name : void insert_split_msg(char* message)
+// Date : 4/20/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function takes a string of any size and separates the message across two
+// LCD buffers. The first (0th) buffer is used for the left LCD (LCD0), and the 
+// second (1st) buffer is used for the right LCD (LCD1). Words that overflow
+// the buffer on the right LCD display are completely moved to the next line of the
+// left LCD for continuity. Spaces at the beginning of each buffer row are removed
+// to improve consistency. 
+//
+// Warnings : Make sure that the lcd0_buff and lcd1_buff have enough rows
+//			  to support the length of the message string
+// Restrictions : none
+// Algorithms : none
+// References : none
+//
+// Revision History : Initial version
+//
+//************************************************************************** 
 
 void insert_split_msg(char* message) {
 	int LCD_select = 0;
@@ -367,11 +388,37 @@ void insert_split_msg(char* message) {
 	}
 }
 
+//***************************************************************************
+//
+// Function Name : void insert_split_names(char** names)
+// Date : 4/20/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function takes a matrix of stored names to display on both of the LCD
+// displays. The first names are displayed on the left LCD right-justified. The
+// last names are displayed on the right LCD left-justified. Both LCDs must be
+// directly next to each other for the continuity of message.
+//
+// Warnings : Full names can only fill a maximum of 33 characters. The
+//			  first and last name can fill a maximum of 16 characters each.
+//			  Make sure that the lcd0_buff and lcd1_buff have enough rows
+//			  to support the length of the message string
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
 void insert_split_names(char** names) {
 	int name_size = 0;
 	for (int i = 0; i < LINES; i++) {
 		int tmp_size = sizeof_array(names[i]);
-		if (tmp_size> name_size) {
+		if (tmp_size > name_size) {
 			name_size = tmp_size;
 		}
 	}
@@ -397,12 +444,38 @@ void insert_split_names(char** names) {
 	}
 }
 
+//***************************************************************************
+//
+// Function Name : down_scroll_display()
+// Date : 4/20/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function takes a matrix of stored names to display on both of the LCD
+// displays. The first names are displayed on the left LCD right-justified. The
+// last names are displayed on the right LCD left-justified. Both LCDs must be
+// directly next to each other for the continuity of message.
+//
+// Warnings : Full names can only fill a maximum of 33 characters. The
+//			  first and last name can fill a maximum of 16 characters each.
+//			  Make sure that the lcd0_buff and lcd1_buff have enough rows
+//			  to support the length of the message string
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
 void down_scroll_display() {
 	init_spi_lcd();
 	
-	for (uint8_t i = 0; i < LINES + 3; i++) {						// Loop for number of down scrolls
+	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
-			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM addr-ctr
+			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter
 			for (uint8_t k = 0; k < 3; k++) {						// Loop to write rows
 				_delay_us(30);
 				for (uint8_t l = 0; l < 16; l++) {					// Loop to write each character in the rows
