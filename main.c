@@ -1,7 +1,7 @@
 //***************************************************************************
 //
-// File Name : Tmain.c
-// Title : Thank You Professor Short!
+// File Name : main.c
+// Title : Professor Short's Gift
 // Date : 4/19/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -11,14 +11,17 @@
 // This program interfaces with two DOG LCD displays using the SPI protocol.
 // Both of the LCD displays will be write-only slaves, and will have to be
 // selected one at a time for the SPI protocol to work with multi-slave
-// SPI communication.
+// SPI communication. Both LCDs must be directly side by side, with LCD0 on 
+// the left and LCD1 on the right. 
 //
 // The SPI pins for the LCD display are listed as follows:
 // MOSI -> PA4 
-// SCK -> PA6 
-// /SS -> PA7
 // MISO -> PA5
-// RS -> PC0
+// SCK -> PA6 
+// /SS0 -> PB0
+// /SS1 -> PB1
+// RS0 -> PC0
+// RS1 -> PC1
 //
 // This program writes both LCD displays in 3 different stages:
 // 
@@ -35,7 +38,7 @@
 // with left scroll
 //
 // Warnings :
-// Restrictions : none
+// Restrictions : The column size of the display buffers must not exceed 16 displayable characters
 // Algorithms : none
 // References :
 //
@@ -44,6 +47,7 @@
 //
 //**************************************************************************
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "DOGM163WA_driver.h"
 
 //extern char names[][33];
@@ -52,7 +56,26 @@
 //extern char lcd1_buff[10][17];
 
 int main(void) {
+	PORTB.DIRCLR |= PIN0_bm;				// Configures PB2 (On-board active low pushbutton) as an input
+	PORTB.PIN2CTRL |= PIN0_bm | PIN1_bm;	// Enables Interrupt on falling edge 
+	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag on PB2
+	init_lcd_dog();							// Configures 
+	sei();									// Enables global interrupts
 	insert_split_names(names);
+	down_scroll_display();
+	while (1) {
+		asm volatile ("nop");
+	}
+	
+	//insert_split_msg(message);
+	//insert_split_names(names);
+}
+
+ISR (PORTB_PORT_vect) {
+	cli();									// Disables global interrupts
+	
+	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag
+	sei();									// Re-enables global interrupts
 }
 
 

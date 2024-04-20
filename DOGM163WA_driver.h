@@ -31,7 +31,8 @@
 #define DOGM163WA_DRIVER_H_
 #include "messages.h"
 #define F_CPU 4000000LU
-#define SIZE 17
+#define LINES 26
+#define MAX_SIZE 17
 #include <stdlib.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -39,10 +40,10 @@
 
 extern char *names[33];
 
-char lcd0_buff[26][17]; 
-char lcd1_buff[26][17];
+char lcd0_buff[LINES][MAX_SIZE]; 
+char lcd1_buff[LINES][MAX_SIZE];
 
-int lcd0_row = 0, lcd1_row = 0;
+static int lcd0_row = 0, lcd1_row = 0;
 
 //***************************************************************************
 //
@@ -337,8 +338,7 @@ int sizeof_matrix(char** matrix) {
 
 void insert_split_msg(char* message) {
 	int LCD_select = 0;
-	int size = sizeof_array(message);
-	for (uint8_t i = 0, col = 0; i < size; i++) {
+	for (uint8_t i = 0, col = 0; i < MAX_SIZE; i++) {
 		
 		if (!col && message[i] == ' ') // Skips any blank spaces at the beginning of each LCD display
 			continue;
@@ -368,38 +368,54 @@ void insert_split_msg(char* message) {
 }
 
 void insert_split_names(char** names) {
-	int size = sizeof_matrix(names);
 	int name_size = 0;
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < LINES; i++) {
 		int tmp_size = sizeof_array(names[i]);
 		if (tmp_size> name_size) {
 			name_size = tmp_size;
 		}
 	}
 	int space;
-	for (uint8_t i = 0; i < size; i++) {
+	for (uint8_t i = 0; i < LINES; i++) {
 		for (space = 0; space < name_size; space++) // Grabs the index of where the space
 			if (names[i][space] == ' ') 
 				break;
 		
-		for (uint8_t j = 0, k = 0; j < SIZE; j++) {
-			if (j >= SIZE - space - 1) {
+		for (uint8_t j = 0, k = 0; j < MAX_SIZE; j++) {
+			if (j >= MAX_SIZE - space - 1) {
 				lcd0_buff[lcd0_row][j] = names[i][k++];
 				continue;
 			}
 			lcd0_buff[lcd0_row][j] = ' ';
 		}
-		lcd0_buff[lcd0_row++][SIZE - 1] = '\0';
+		lcd0_buff[lcd0_row++][MAX_SIZE - 1] = '\0';
 		
 		for (uint8_t j = 0; j < name_size - space; j++) {			
 			lcd1_buff[lcd1_row][j] = names[i][space + j];
 		}
-		lcd1_buff[lcd1_row++][SIZE - 1] = '\0';
+		lcd1_buff[lcd1_row++][MAX_SIZE - 1] = '\0';
 	}
 }
 
 void down_scroll_display() {
+	init_spi_lcd();
 	
+	for (uint8_t i = 0; i < LINES + 3; i++) {						// Loop for number of down scrolls
+		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
+			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM addr-ctr
+			for (uint8_t k = 0; k < 3; k++) {						// Loop to write rows
+				_delay_us(30);
+				for (uint8_t l = 0; l < 16; l++) {					// Loop to write each character in the rows
+					if (!j) {
+						lcd_spi_transmit_DATA(i, lcd0_buff[i + k][l]);
+					}
+					else
+						lcd_spi_transmit_DATA(i, lcd1_buff[i + k][l]);
+					_delay_us(30);
+				}
+			}
+		}
+	}
 }
 
 #endif

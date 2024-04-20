@@ -58,4 +58,8 @@ char message[] = {
 	"Thank you for teaching us, through good health and sickness, you've always been there and we appreciate you. We hope you get better soon"
 };
 
+char idle_screen[] = {
+	
+};
+
 #endif /* NAMES_H_ */
