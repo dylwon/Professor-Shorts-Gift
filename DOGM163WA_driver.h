@@ -49,7 +49,7 @@ static int lcd0_row = 0, lcd1_row = 0;
 
 //***************************************************************************
 //
-// Function Name : void lcd_spi_transmit_CMD (int LCD, unsigned char cmd)
+// Function Name : void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd)
 // Date : 3/29/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -72,7 +72,7 @@ static int lcd0_row = 0, lcd1_row = 0;
 //
 //**************************************************************************
  
-void lcd_spi_transmit_CMD (int LCD, unsigned char cmd) {
+void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
 	if (LCD == 0) {
 		VPORTB_OUT &= ~PIN0_bm; // /SS0 = 0 to select LCD0
 		VPORTC_OUT &= ~PIN0_bm; // RS0 = 0 for command
@@ -93,7 +93,7 @@ void lcd_spi_transmit_CMD (int LCD, unsigned char cmd) {
 
 //***************************************************************************
 //
-// Function Name : void lcd_spi_transmit_CMD (int LCD, unsigned char cmd)
+// Function Name : void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd)
 // Date : 3/29/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -116,7 +116,7 @@ void lcd_spi_transmit_CMD (int LCD, unsigned char cmd) {
 //
 //**************************************************************************
 
-void lcd_spi_transmit_DATA (int LCD, unsigned char cmd) {
+void lcd_spi_transmit_DATA (uint8_t LCD, unsigned char cmd) {
 	if (LCD == 0) {
 		VPORTB_OUT &= ~PIN0_bm; // /SS0 = 0 to select LCD0
 		VPORTC_OUT |= PIN0_bm; // RS0 = 1 for data
@@ -286,19 +286,19 @@ void update_lcd_dog(void) {
 	// send line 1 to the LCD module.
 	lcd_spi_transmit_CMD(0, 0x80);	//init DDRAM addr-ctr
 	_delay_us(30);
-	for (int i = 0; i < 16; i++) {
+	for (uint8_t i = 0; i < 16; i++) {
 		lcd_spi_transmit_DATA(0, dsp_buff1[i]);
 		_delay_us(30);
 	}
 
 	_delay_us(30);
-	for (int i = 0; i < 16; i++) {
+	for (uint8_t i = 0; i < 16; i++) {
 		lcd_spi_transmit_DATA(dsp_buff2[i]);
 		_delay_us(30);
 	}
 	
 	_delay_us(30);
-	for (int i = 0; i < 16; i++) {
+	for (uint8_t i = 0; i < 16; i++) {
 		lcd_spi_transmit_DATA(dsp_buff3[i]);
 		_delay_us(30);
 	}
@@ -344,8 +344,7 @@ int sizeof_matrix(char** matrix) {
 // LCD buffers. The first (0th) buffer is used for the left LCD (LCD0), and the 
 // second (1st) buffer is used for the right LCD (LCD1). Words that overflow
 // the buffer on the right LCD display are completely moved to the next line of the
-// left LCD for continuity. Spaces at the beginning of each buffer row are removed
-// to improve consistency. 
+// left LCD for continuity. Spaces at the beginning of the first buffer row are removed
 //
 // Warnings : Make sure that the lcd0_buff and lcd1_buff have enough rows
 //			  to support the length of the message string
@@ -358,10 +357,10 @@ int sizeof_matrix(char** matrix) {
 //************************************************************************** 
 
 void insert_split_msg(char* message) {
-	int LCD_select = 0;
+	uint8_t LCD_select = 0;
 	for (uint8_t i = 0, col = 0; i < MAX_SIZE; i++) {
 		
-		if (!col && message[i] == ' ') // Skips any blank spaces at the beginning of each LCD display
+		if (!LCD_select && !col && message[i] == ' ') // Skips any blank spaces at the beginning of the first LCD display
 			continue;
 		else if (!LCD_select) // Puts character into left LCD
 			lcd0_buff[lcd0_row][col++] = message[i];
@@ -415,16 +414,16 @@ void insert_split_msg(char* message) {
 //**************************************************************************
 
 void insert_split_names(char** names) {
-	int name_size = 0;
-	for (int i = 0; i < LINES; i++) {
-		int tmp_size = sizeof_array(names[i]);
-		if (tmp_size > name_size) {
-			name_size = tmp_size;
+	uint8_t line_size = 0;
+	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
+		tmp_size = sizeof_array(names[i]);
+		if (tmp_size > line_size) {
+			line_size = tmp_size;
 		}
 	}
-	int space;
+	uint8_t space;
 	for (uint8_t i = 0; i < LINES; i++) {
-		for (space = 0; space < name_size; space++) // Grabs the index of where the space
+		for (space = 0; space < line_size; space++) // Grabs the index of where the space
 			if (names[i][space] == ' ') 
 				break;
 		
@@ -437,11 +436,27 @@ void insert_split_names(char** names) {
 		}
 		lcd0_buff[lcd0_row++][MAX_SIZE - 1] = '\0';
 		
-		for (uint8_t j = 0; j < name_size - space; j++) {			
+		for (uint8_t j = 0; j < line_size - space; j++) {			
 			lcd1_buff[lcd1_row][j] = names[i][space + j];
 		}
 		lcd1_buff[lcd1_row++][MAX_SIZE - 1] = '\0';
 	}
+}
+
+void center_justify(char** matrix0, char** matrix1) {
+	uint8_t line_size = 0;
+	
+	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
+		tmp_size = sizeof_array(names[i]);
+		if (tmp_size > line_size) {
+			line_size = tmp_size;
+		}
+	}
+	
+	for (uint8_t i = line_size; i > 0; i--) {
+		
+	}
+	
 }
 
 //***************************************************************************
