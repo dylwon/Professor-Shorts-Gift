@@ -358,7 +358,8 @@ int sizeof_matrix(char** matrix) {
 
 void insert_split_msg(char* message) {
 	uint8_t LCD_select = 0;
-	for (uint8_t i = 0, col = 0; i < MAX_SIZE; i++) {
+	int line_size = sizeof_array(message);
+	for (int i = 0, col = 0; i < line_size; i++) {
 		
 		if (!LCD_select && !col && message[i] == ' ') // Skips any blank spaces at the beginning of the first LCD display
 			continue;
@@ -421,6 +422,7 @@ void insert_split_names(char** names) {
 			line_size = tmp_size;
 		}
 	}
+	
 	uint8_t space;
 	for (uint8_t i = 0; i < LINES; i++) {
 		for (space = 0; space < line_size; space++) // Grabs the index of where the space
@@ -434,6 +436,7 @@ void insert_split_names(char** names) {
 			}
 			lcd0_buff[lcd0_row][j] = ' ';
 		}
+		
 		lcd0_buff[lcd0_row++][MAX_SIZE - 1] = '\0';
 		
 		for (uint8_t j = 0; j < line_size - space; j++) {			
@@ -444,18 +447,31 @@ void insert_split_names(char** names) {
 }
 
 void center_justify(char** matrix0, char** matrix1) {
-	uint8_t line_size = 0;
+	int count = 0;
 	
-	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
-		tmp_size = sizeof_array(names[i]);
-		if (tmp_size > line_size) {
-			line_size = tmp_size;
+	for (uint8_t i = 0; i < LINES; i++) {
+		for (uint8_t j = MAX_SIZE - 2; j > 0; j--) { // Starts at index that can have last possible character and counts whitespaces/nulls
+					
+			if (matrix1[i][j] != ' ' && matrix1[i][j] != '\0')
+				break;
+			matrix1[i][j] = ' ';							// Replaces any other null characters with spaces
+			count++;
+		}
+		
+		for (uint8_t j = 0; j < count/2; j++) {
+			for (uint8_t k = MAX_SIZE - 2; k > 1; k--) {	// Shifts all contents of matrix1 to the right by 1
+				matrix1[i][k] = matrix1[i][k - 1];
+				//memmove(&matrix1[i][j + 1], &matrix1[i][j], (MAX_SIZE - j - 1) * sizeof(uint8_t));
+			}
+			
+			matrix1[i][0] = matrix0[i][MAX_SIZE - 2];				// First index of matrix1 gets the rolled over value of matrix0
+			
+			for (uint8_t k = MAX_SIZE - 2; k > 1; k--) {	// Shifts all contents of matrix0 to the right by 1
+				matrix0[i][k] = matrix0[i][k - 1];
+			}
 		}
 	}
 	
-	for (uint8_t i = line_size; i > 0; i--) {
-		
-	}
 	
 }
 

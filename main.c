@@ -51,7 +51,7 @@
 #include "DOGM163WA_driver.h"
 
 //extern char names[][33];
-//extern char message[];
+extern char message[];
 //extern char lcd0_buff[10][17];
 //extern char lcd1_buff[10][17];
 
@@ -59,10 +59,13 @@ int main(void) {
 	PORTB.DIRCLR |= PIN0_bm;				// Configures PB2 (On-board active low pushbutton) as an input
 	PORTB.PIN2CTRL |= PIN0_bm | PIN1_bm;	// Enables Interrupt on falling edge 
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag on PB2
+	
+	insert_split_msg(message);
+	center_justify(lcd0_buff, lcd1_buff);
+	
 	init_lcd_dog();							// Configures 
 	sei();									// Enables global interrupts
-	insert_split_names(names);
-	down_scroll_display();
+	
 	while (1) {
 		asm volatile ("nop");
 	}
