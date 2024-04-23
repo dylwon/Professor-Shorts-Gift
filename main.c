@@ -18,8 +18,8 @@
 // MOSI -> PA4 
 // MISO -> PA5
 // SCK -> PA6 
-// /SS0 -> PB0
-// /SS1 -> PB1
+// /SS0 -> PA7
+// /SS1 -> 
 // RS0 -> PC0
 // RS1 -> PC1
 //
@@ -56,26 +56,26 @@ extern char message[];
 //extern char lcd1_buff[10][17];
 
 int main(void) {
-	PORTB.DIRCLR |= PIN0_bm;				// Configures PB2 (On-board active low pushbutton) as an input
+	init_lcd_dog();							// Configures LCDs
+	
+	PORTB.DIRCLR |= PIN2_bm;				// Configures PB2 (On-board active low pushbutton) as an input
 	PORTB.PIN2CTRL |= PIN0_bm | PIN1_bm;	// Enables Interrupt on falling edge 
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag on PB2
 	
-	insert_split_msg(message);
-	center_justify(lcd0_buff, lcd1_buff);
-	
-	init_lcd_dog();							// Configures 
 	sei();									// Enables global interrupts
 	
 	while (1) {
 		asm volatile ("nop");
 	}
 	
-	//insert_split_msg(message);
-	//insert_split_names(names);
 }
 
 ISR (PORTB_PORT_vect) {
 	cli();									// Disables global interrupts
+	
+	insert_split_msg(message);
+	insert_split_names(names);
+	down_scroll_display();
 	
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag
 	sei();									// Re-enables global interrupts

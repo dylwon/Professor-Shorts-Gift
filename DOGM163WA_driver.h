@@ -14,8 +14,8 @@
 // MOSI -> PA4
 // MISO -> PA5
 // SCK -> PA6
-// /SS0 -> PB0
-// /SS1 -> PB1
+// /SS0 -> PA7
+// /SS1 -> 
 // RS0 -> PC0
 // RS1 -> PC1
 //
@@ -33,7 +33,7 @@
 #define DOGM163WA_DRIVER_H_
 #include "messages.h"
 #define F_CPU 4000000LU
-#define LINES 26
+#define LINES 100
 #define MAX_SIZE 17
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,22 +73,22 @@ static int lcd0_row = 0, lcd1_row = 0;
 //**************************************************************************
  
 void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
-	if (LCD == 0) {
-		VPORTB_OUT &= ~PIN0_bm; // /SS0 = 0 to select LCD0
-		VPORTC_OUT &= ~PIN0_bm; // RS0 = 0 for command
+	if (!LCD) {
+		VPORTA.OUT &= ~PIN7_bm; // /SS0 = 0 to select LCD0
+		VPORTC.OUT &= ~PIN0_bm; // RS0 = 0 for command
 	}
 	else {
-		VPORTB_OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
-		VPORTC_OUT &= ~PIN1_bm; // RS1 = 0 for command
+		VPORTB.OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
+		VPORTC.OUT &= ~PIN1_bm; // RS1 = 0 for command
 	}
 	
 	SPI0.DATA = cmd;		//send command
 	while(!(SPI0.INTFLAGS & SPI_IF_bm)) {}    // Wait until IF flag is set
 		
 	if (LCD == 0)
-		VPORTB_OUT |= PIN0_bm; // /SS0 = 1 to de-select LCD0
+		VPORTA.OUT |= PIN7_bm; // /SS0 = 1 to de-select LCD0
 	else
-		VPORTB_OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
 }
 
 //***************************************************************************
@@ -118,21 +118,21 @@ void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
 
 void lcd_spi_transmit_DATA (uint8_t LCD, unsigned char cmd) {
 	if (LCD == 0) {
-		VPORTB_OUT &= ~PIN0_bm; // /SS0 = 0 to select LCD0
-		VPORTC_OUT |= PIN0_bm; // RS0 = 1 for data
+		VPORTA.OUT &= ~PIN7_bm; // /SS0 = 0 to select LCD0
+		VPORTC.OUT |= PIN0_bm; // RS0 = 1 for data
 	}
 	else {
-		VPORTB_OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
-		VPORTC_OUT |= PIN1_bm; // RS1 = 1 for data
+		VPORTB.OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
+		VPORTC.OUT |= PIN1_bm; // RS1 = 1 for data
 	}
 	
 	SPI0.DATA = cmd;		//send command
 	while(!(SPI0.INTFLAGS & SPI_IF_bm)) {}    // Wait until IF flag is set
 	
 	if (LCD == 0)
-		VPORTB_OUT |= PIN0_bm; // /SS0 = 1 to de-select LCD0
+		VPORTA.OUT |= PIN7_bm; // /SS0 = 1 to de-select LCD0
 	else
-		VPORTB_OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
 }
 
 //***************************************************************************
@@ -164,16 +164,19 @@ void init_spi_lcd (void) {
 	// Generic clock generator 0, enabled at reset @ 4MHz, is used for peripheral clock
 	
 	// Pin Direction Configurations & Initializations for both LCDs
-	VPORTA_DIR |= PIN4_bm | PIN6_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK
-	VPORTB_DIR |= PIN0_bm | PIN1_bm; // PB0 is output for /SS0 (SS for LCD0), PB1 is output for /SS1 (SS for LCD1)
-	VPORTB_OUT |= PIN0_bm | PIN1_bm; // Idles /SS0 and /SS1 as high to de-select LCDs
-	VPORTC_DIR |= PIN0_bm | PIN1_bm; // PC0 is output for RS0 of LCD0, PC1 is output for RS1 of LCD1
+	//VPORTA.DIR |= PIN4_bm | PIN6_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK
+	VPORTA.DIR |= PIN4_bm | PIN6_bm | PIN7_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK, PA7 is output for /SS0
+	VPORTA.OUT |= PIN7_bm; // Idles /SS0 as high to de-select LCD0
+	//VPORTB.DIR |= PIN0_bm | PIN1_bm; // PB0 is output for /SS0 (SS for LCD0), PB1 is output for /SS1 (SS for LCD1)
+	//VPORTB.OUT |= PIN0_bm | PIN1_bm; // Idles /SS0 and /SS1 as high to de-select LCDs
+	VPORTC.DIR |= PIN0_bm | PIN1_bm; // PC0 is output for RS0 of LCD0, PC1 is output for RS1 of LCD1
 	
 	// SPI Configuration
 	SPI0.CTRLA |= SPI_MASTER_bm | SPI_ENABLE_bm; // Sets AVR128DB48 as master, and enables SPI protocol
 	SPI0.CTRLB |= SPI_MODE_3_gc; // Enables SPI mode 3 (CPOL = 1, CPHA = 1) and Data order sends MSB first
 
-	VPORTC_OUT &= ~(PIN0_bm | PIN1_bm);	// RS0 = 0 and RS1 = 0 for command sends
+	//VPORTA.OUT |= PIN7_bm; // Idles /SS0 as high to de-select LCD1
+	VPORTC.OUT &= ~(PIN0_bm | PIN1_bm);	// RS0 = 0 and RS1 = 0 for command sends
 }
 
 //***************************************************************************
@@ -417,6 +420,7 @@ void insert_split_msg(char* message) {
 void insert_split_names(char** names) {
 	uint8_t line_size = 0;
 	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
+		if (names[i] == NULL) break;
 		tmp_size = sizeof_array(names[i]);
 		if (tmp_size > line_size) {
 			line_size = tmp_size;
@@ -425,6 +429,7 @@ void insert_split_names(char** names) {
 	
 	uint8_t space;
 	for (uint8_t i = 0; i < LINES; i++) {
+		if (names[i] == NULL) break;
 		for (space = 0; space < line_size; space++) // Grabs the index of where the space
 			if (names[i][space] == ' ') 
 				break;
@@ -505,6 +510,7 @@ void down_scroll_display() {
 	init_spi_lcd();
 	
 	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
+		if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
 			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter
 			for (uint8_t k = 0; k < 3; k++) {						// Loop to write rows
@@ -519,6 +525,7 @@ void down_scroll_display() {
 				}
 			}
 		}
+		_delay_ms(10);
 	}
 }
 
