@@ -14,8 +14,8 @@
 // MOSI -> PA4
 // MISO -> PA5
 // SCK -> PA6
-// /SS0 -> PA7
-// /SS1 -> 
+// /SS0 -> PB0
+// /SS1 -> PB1
 // RS0 -> PC0
 // RS1 -> PC1
 //
@@ -74,10 +74,12 @@ static int lcd0_row = 0, lcd1_row = 0;
  
 void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
 	if (!LCD) {
-		VPORTA.OUT &= ~PIN7_bm; // /SS0 = 0 to select LCD0
+		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+		VPORTB.OUT &= ~PIN0_bm; // /SS0 = 0 to select LCD0
 		VPORTC.OUT &= ~PIN0_bm; // RS0 = 0 for command
 	}
 	else {
+		VPORTB.OUT |= PIN0_bm;  // /SS0 = 1 to de-select LCD0
 		VPORTB.OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
 		VPORTC.OUT &= ~PIN1_bm; // RS1 = 0 for command
 	}
@@ -85,10 +87,7 @@ void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
 	SPI0.DATA = cmd;		//send command
 	while(!(SPI0.INTFLAGS & SPI_IF_bm)) {}    // Wait until IF flag is set
 		
-	if (LCD == 0)
-		VPORTA.OUT |= PIN7_bm; // /SS0 = 1 to de-select LCD0
-	else
-		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+	VPORTB.OUT |= PIN0_bm | PIN1_bm; // /SS0 = 1 and /SS1 = 1 to de-select LCD0 and LCD1
 }
 
 //***************************************************************************
@@ -117,11 +116,13 @@ void lcd_spi_transmit_CMD (uint8_t LCD, unsigned char cmd) {
 //**************************************************************************
 
 void lcd_spi_transmit_DATA (uint8_t LCD, unsigned char cmd) {
-	if (LCD == 0) {
-		VPORTA.OUT &= ~PIN7_bm; // /SS0 = 0 to select LCD0
+	if (!LCD) {
+		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+		VPORTB.OUT &= ~PIN0_bm;	// /SS0 = 0 to select LCD0
 		VPORTC.OUT |= PIN0_bm; // RS0 = 1 for data
 	}
 	else {
+		VPORTB.OUT |= PIN0_bm; // /SS0 = 1 to de-select LCD0
 		VPORTB.OUT &= ~PIN1_bm; // /SS1 = 0 to select LCD1
 		VPORTC.OUT |= PIN1_bm; // RS1 = 1 for data
 	}
@@ -129,10 +130,7 @@ void lcd_spi_transmit_DATA (uint8_t LCD, unsigned char cmd) {
 	SPI0.DATA = cmd;		//send command
 	while(!(SPI0.INTFLAGS & SPI_IF_bm)) {}    // Wait until IF flag is set
 	
-	if (LCD == 0)
-		VPORTA.OUT |= PIN7_bm; // /SS0 = 1 to de-select LCD0
-	else
-		VPORTB.OUT |= PIN1_bm; // /SS1 = 1 to de-select LCD1
+	VPORTB.OUT |= PIN0_bm | PIN1_bm; // /SS0 = 1 and /SS1 = 1 to de-select LCD0 and LCD1
 }
 
 //***************************************************************************
@@ -164,18 +162,15 @@ void init_spi_lcd (void) {
 	// Generic clock generator 0, enabled at reset @ 4MHz, is used for peripheral clock
 	
 	// Pin Direction Configurations & Initializations for both LCDs
-	//VPORTA.DIR |= PIN4_bm | PIN6_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK
-	VPORTA.DIR |= PIN4_bm | PIN6_bm | PIN7_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK, PA7 is output for /SS0
-	VPORTA.OUT |= PIN7_bm; // Idles /SS0 as high to de-select LCD0
-	//VPORTB.DIR |= PIN0_bm | PIN1_bm; // PB0 is output for /SS0 (SS for LCD0), PB1 is output for /SS1 (SS for LCD1)
-	//VPORTB.OUT |= PIN0_bm | PIN1_bm; // Idles /SS0 and /SS1 as high to de-select LCDs
+	VPORTA.DIR |= PIN4_bm | PIN6_bm; // PA4 is output for MOSI, PA5 is input for MISO, PA6 is output for SCK
+	VPORTB.DIR |= PIN0_bm | PIN1_bm; // PB0 is output for /SS0 (SS for LCD0), PB1 is output for /SS1 (SS for LCD1)
+	VPORTB.OUT |= PIN0_bm | PIN1_bm; // Idles /SS0 and /SS1 as high to de-select LCDs
 	VPORTC.DIR |= PIN0_bm | PIN1_bm; // PC0 is output for RS0 of LCD0, PC1 is output for RS1 of LCD1
 	
 	// SPI Configuration
 	SPI0.CTRLA |= SPI_MASTER_bm | SPI_ENABLE_bm; // Sets AVR128DB48 as master, and enables SPI protocol
 	SPI0.CTRLB |= SPI_MODE_3_gc; // Enables SPI mode 3 (CPOL = 1, CPHA = 1) and Data order sends MSB first
 
-	//VPORTA.OUT |= PIN7_bm; // Idles /SS0 as high to de-select LCD1
 	VPORTC.OUT &= ~(PIN0_bm | PIN1_bm);	// RS0 = 0 and RS1 = 0 for command sends
 }
 
@@ -205,7 +200,7 @@ void init_spi_lcd (void) {
 void init_lcd_dog (void) {
 	init_spi_lcd();		//Initialize MCU for SPI with both LCD displays
 	
-	for (uint8_t i = 0; i < 1; i++) {
+	for (uint8_t i = 0; i < 2; i++) {
 		//start_dly_40ms:
 		_delay_ms(40);	//40ms delay for command to be processed
 
@@ -253,6 +248,7 @@ void init_lcd_dog (void) {
 		//entry_mode:
 		lcd_spi_transmit_CMD(i, 0x06);	//clear display, cursor home
 		_delay_us(30);	//26.3us delay for command to be processed
+	
 	}
 	
 }
@@ -510,7 +506,7 @@ void down_scroll_display() {
 	init_spi_lcd();
 	
 	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
-		if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
+		//if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
 			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter
 			for (uint8_t k = 0; k < 3; k++) {						// Loop to write rows
@@ -525,7 +521,7 @@ void down_scroll_display() {
 				}
 			}
 		}
-		_delay_ms(10);
+		_delay_ms(1000);
 	}
 }
 

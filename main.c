@@ -18,8 +18,8 @@
 // MOSI -> PA4 
 // MISO -> PA5
 // SCK -> PA6 
-// /SS0 -> PA7
-// /SS1 -> 
+// /SS0 -> PB0
+// /SS1 -> PB1
 // RS0 -> PC0
 // RS1 -> PC1
 //
