@@ -56,6 +56,7 @@ extern char message[];
 //extern char lcd1_buff[10][17];
 
 int main(void) {
+	_delay_ms(500);
 	init_lcd_dog();							// Configures LCDs
 	
 	PORTB.DIRCLR |= PIN2_bm;				// Configures PB2 (On-board active low pushbutton) as an input
@@ -65,13 +66,13 @@ int main(void) {
 	insert_split_msg(message);
 	insert_split_names(names);
 	insert_split_msg(special_thanks);
-	//insert_split_msg(two_lines);
 	
 	still_display();
 	
 	sei();									// Enables global interrupts
 	
 	while (1) {
+		still_display();
 		asm volatile ("nop");
 	}
 	
