@@ -26,12 +26,13 @@
 #include <stdlib.h>
 
 char *names[33] = {
+	"Stanley Cokro",
 	"Nisat Nosin",
+	"Dylan Wong",
 	"Luke Melfa",
 	"Eric Yang",
 	"Farhaan Khan",
 	"Johnson Varghese",
-	"Stanley Cokro",
 	"Hillary Ng",
 	"John Shin",
 	"Ben Weng",
@@ -44,7 +45,6 @@ char *names[33] = {
 	"Kyle Han",
 	"Spencer Wu",
 	"Rachel Leong",
-	"Dylan Wong",
 	"Natalie Sid",
 	"Dilshoda Sayfillaeva",
 	"Alexander Monov",
@@ -56,6 +56,10 @@ char *names[33] = {
 
 char message[] = { 
 	"Thank you for teaching us, through good health and sickness, you've always been there and we appreciate you. We hope you get better soon"
+};
+
+char special_thanks[] = {
+	"Special Thanks to Bryant Gonzaga for organizing this student project"
 };
 
 char idle_screen[] = {

@@ -76,6 +76,7 @@ ISR (PORTB_PORT_vect) {
 	insert_split_msg(message);
 	insert_split_names(names);
 	down_scroll_display();
+	insert_split_msg(special_thanks);
 	
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag
 	sei();									// Re-enables global interrupts

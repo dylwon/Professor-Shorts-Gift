@@ -356,6 +356,13 @@ int sizeof_matrix(char** matrix) {
 //************************************************************************** 
 
 void insert_split_msg(char* message) {
+	/*
+	if (lcd0_buff[lcd0_row] != NULL && lcd0_row != 0)
+		lcd1_row = ++lcd0_row;
+	if (lcd1_buff[lcd1_row] != NULL && lcd1_row != 0)
+		lcd0_row = ++lcd1_row;
+	*/
+		
 	uint8_t LCD_select = 0;
 	int line_size = sizeof_array(message);
 	for (int i = 0, col = 0; i < line_size; i++) {
@@ -385,6 +392,7 @@ void insert_split_msg(char* message) {
 			col = 0;
 		}
 	}
+	lcd0_row = ++lcd1_row;
 }
 
 //***************************************************************************
@@ -414,6 +422,13 @@ void insert_split_msg(char* message) {
 //**************************************************************************
 
 void insert_split_names(char** names) {
+	/*
+	if (lcd0_buff[lcd0_row] != NULL && lcd0_row != 0)
+		lcd1_row = ++lcd0_row;
+	if (lcd1_buff[lcd1_row] != NULL && lcd1_row != 0)
+		lcd0_row = ++lcd1_row;
+	*/
+		
 	uint8_t line_size = 0;
 	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
 		if (names[i] == NULL) break;
@@ -440,9 +455,15 @@ void insert_split_names(char** names) {
 		
 		lcd0_buff[lcd0_row++][MAX_SIZE - 1] = '\0';
 		
-		for (uint8_t j = 0; j < line_size - space; j++) {			
-			lcd1_buff[lcd1_row][j] = names[i][space + j];
+		for (uint8_t j = 0, brk = 1; j < MAX_SIZE; j++) {	
+			if (names[i][space + j + 1] != NULL && brk)		
+				lcd1_buff[lcd1_row][j] = names[i][space + j + 1];
+			else {
+				brk = 0;
+				lcd1_buff[lcd1_row][j] = ' ';
+			}
 		}
+	
 		lcd1_buff[lcd1_row++][MAX_SIZE - 1] = '\0';
 	}
 }
@@ -451,6 +472,9 @@ void center_justify(char** matrix0, char** matrix1) {
 	int count = 0;
 	
 	for (uint8_t i = 0; i < LINES; i++) {
+		if (matrix0[lcd0_row][0] == ' ') // Skips if it's not a left-justified message
+			continue;
+			
 		for (uint8_t j = MAX_SIZE - 2; j > 0; j--) { // Starts at index that can have last possible character and counts whitespaces/nulls
 					
 			if (matrix1[i][j] != ' ' && matrix1[i][j] != '\0')
@@ -503,20 +527,19 @@ void center_justify(char** matrix0, char** matrix1) {
 //**************************************************************************
 
 void down_scroll_display() {
-	init_spi_lcd();
 	
 	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
-		//if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
+		if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
+			init_spi_lcd();
 			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter
 			for (uint8_t k = 0; k < 3; k++) {						// Loop to write rows
 				_delay_us(30);
 				for (uint8_t l = 0; l < 16; l++) {					// Loop to write each character in the rows
-					if (!j) {
-						lcd_spi_transmit_DATA(i, lcd0_buff[i + k][l]);
-					}
+					if (!j)
+						lcd_spi_transmit_DATA(j, lcd0_buff[i + k][l]);
 					else
-						lcd_spi_transmit_DATA(i, lcd1_buff[i + k][l]);
+						lcd_spi_transmit_DATA(j, lcd1_buff[i + k][l]);
 					_delay_us(30);
 				}
 			}
