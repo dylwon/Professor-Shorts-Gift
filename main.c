@@ -62,6 +62,13 @@ int main(void) {
 	PORTB.PIN2CTRL |= PIN0_bm | PIN1_bm;	// Enables Interrupt on falling edge 
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag on PB2
 	
+	insert_split_msg(message);
+	insert_split_names(names);
+	insert_split_msg(special_thanks);
+	//insert_split_msg(two_lines);
+	
+	still_display();
+	
 	sei();									// Enables global interrupts
 	
 	while (1) {
@@ -72,13 +79,9 @@ int main(void) {
 
 ISR (PORTB_PORT_vect) {
 	cli();									// Disables global interrupts
-	
-	insert_split_msg(message);
-	insert_split_names(names);
-	insert_split_msg(special_thanks);
+
 	down_scroll_display();
-	
-	
+		
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag
 	sei();									// Re-enables global interrupts
 }

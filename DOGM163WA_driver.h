@@ -35,6 +35,7 @@
 #define F_CPU 4000000LU
 #define LINES 100
 #define MAX_SIZE 17
+#define SCROLLSPEED 100
 #include <stdlib.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -255,14 +256,14 @@ void init_lcd_dog (void) {
 
 //***************************************************************************
 //
-// Function Name : void update_lcd_dog(void)
+// Function Name : void still_display(void)
 // Date : 3/29/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
 // Target Hardware : AVR128DB48
-// Author : Kenneth Short
+// Author : Dylan Wong
 //
-// This function updates the text shown on the DOG LCD. This function uses both of the
+// This function updates the text shown on both the DOG LCDs. This function uses both of the
 // SPI transmit functions written above to send the proper information. First, an address
 // is sent to let the DOG LCD know which line it's writing in. Then, a for-loop is used to transmit
 // all of the bytes in the display buffers. This step is repeated for all of the 3 lines and buffers.
@@ -276,32 +277,23 @@ void init_lcd_dog (void) {
 //
 //**************************************************************************
 
-// Updates the LCD display lines 1, 2, and 3, using the
-// contents of dsp_buff_1, dsp_buff_2, and dsp_buff_3, respectively.
-void update_lcd_dog(void) {
-/*
-	init_spi_lcd();		//init SPI port for both LCDs.
-
-	// send line 1 to the LCD module.
-	lcd_spi_transmit_CMD(0, 0x80);	//init DDRAM addr-ctr
-	_delay_us(30);
-	for (uint8_t i = 0; i < 16; i++) {
-		lcd_spi_transmit_DATA(0, dsp_buff1[i]);
-		_delay_us(30);
-	}
-
-	_delay_us(30);
-	for (uint8_t i = 0; i < 16; i++) {
-		lcd_spi_transmit_DATA(dsp_buff2[i]);
-		_delay_us(30);
-	}
+void still_display(void) {
 	
-	_delay_us(30);
-	for (uint8_t i = 0; i < 16; i++) {
-		lcd_spi_transmit_DATA(dsp_buff3[i]);
-		_delay_us(30);
+	for (uint8_t i = 0; i < 2; i++) {							// Loop to write left/right LCD display
+		init_spi_lcd();
+		lcd_spi_transmit_CMD(i, 0x80);							// init DDRAM address counter
+		for (uint8_t j = 0; j < 3; j++) {						// Loop to write rows
+			_delay_us(30);
+			for (uint8_t k = 0; k < 16; k++) {					// Loop to write each character in the rows
+				if (!i)
+					lcd_spi_transmit_DATA(i, lcd0_buff[j][k]);
+				else
+					lcd_spi_transmit_DATA(i, lcd1_buff[j][k]);
+				_delay_us(30);
+			}
+		}
 	}
-*/
+
 	
 }
 
@@ -502,7 +494,7 @@ void center_justify(char** matrix0, char** matrix1) {
 
 //***************************************************************************
 //
-// Function Name : down_scroll_display()
+// Function Name : down_scroll_display(void)
 // Date : 4/20/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -526,10 +518,10 @@ void center_justify(char** matrix0, char** matrix1) {
 //
 //**************************************************************************
 
-void down_scroll_display() {
+void down_scroll_display(void) {
 	
 	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
-		if (lcd0_buff[i] == NULL || lcd1_buff[i] == NULL) break;
+		if (lcd0_buff[i][0] == NULL || lcd1_buff[i][0] == NULL) break;
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
 			init_spi_lcd();
 			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter
@@ -544,7 +536,7 @@ void down_scroll_display() {
 				}
 			}
 		}
-		_delay_ms(1000);
+		_delay_ms(SCROLLSPEED);
 	}
 }
 
