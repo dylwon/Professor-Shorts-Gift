@@ -35,7 +35,7 @@
 #define F_CPU 4000000LU
 #define LINES 100
 #define MAX_SIZE 17
-#define SCROLLSPEED 100
+#define SCROLLSPEED 1000
 #include <stdlib.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -170,7 +170,7 @@ void init_spi_lcd (void) {
 	
 	// SPI Configuration
 	SPI0.CTRLA |= SPI_MASTER_bm | SPI_ENABLE_bm; // Sets AVR128DB48 as master, and enables SPI protocol
-	SPI0.CTRLB |= SPI_MODE_3_gc; // Enables SPI mode 3 (CPOL = 1, CPHA = 1) and Data order sends MSB first
+	SPI0.CTRLB |= SPI_SSD_bm | SPI_MODE_3_gc; // Enables SPI mode 3 (CPOL = 1, CPHA = 1) and Data order sends MSB first
 
 	VPORTC.OUT &= ~(PIN0_bm | PIN1_bm);	// RS0 = 0 and RS1 = 0 for command sends
 }
@@ -237,7 +237,7 @@ void init_lcd_dog (void) {
 
 
 		//display_on:
-		lcd_spi_transmit_CMD(i, 0x0c);	//display on, cursor off, blink off
+		lcd_spi_transmit_CMD(i, 0x0C);	//display on, cursor off, blink off
 		_delay_us(30);	//26.3us delay for command to be processed
 
 
@@ -247,7 +247,7 @@ void init_lcd_dog (void) {
 
 
 		//entry_mode:
-		lcd_spi_transmit_CMD(i, 0x06);	//clear display, cursor home
+		lcd_spi_transmit_CMD(i, 0x06);	//clear display, cursor home & auto-increment
 		_delay_us(30);	//26.3us delay for command to be processed
 	
 	}
@@ -282,6 +282,7 @@ void still_display(void) {
 	for (uint8_t i = 0; i < 2; i++) {							// Loop to write left/right LCD display
 		init_spi_lcd();
 		lcd_spi_transmit_CMD(i, 0x80);							// init DDRAM address counter
+		//lcd_spi_transmit_CMD(i, )
 		for (uint8_t j = 0; j < 3; j++) {						// Loop to write rows
 			_delay_us(30);
 			for (uint8_t k = 0; k < 16; k++) {					// Loop to write each character in the rows
@@ -538,6 +539,7 @@ void down_scroll_display(void) {
 		}
 		_delay_ms(SCROLLSPEED);
 	}
+	_delay_ms(1000);
 }
 
 #endif
