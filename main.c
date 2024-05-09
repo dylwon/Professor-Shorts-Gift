@@ -46,17 +46,14 @@
 //
 //
 //**************************************************************************
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include "DOGM163WA_driver.h"
+#include <avr/interrupt.h>		
 
-//extern char names[][33];
-extern char message[];
-//extern char lcd0_buff[10][17];
-//extern char lcd1_buff[10][17];
+#include "messages.h"																																
+#include "DOGM163WA.h"
+#include "functions.h"
 
 int main(void) {
-	_delay_ms(500);
+	//_delay_ms(500);
 	init_lcd_dog();							// Configures LCDs
 	
 	PORTB.DIRCLR |= PIN2_bm;				// Configures PB2 (On-board active low pushbutton) as an input
