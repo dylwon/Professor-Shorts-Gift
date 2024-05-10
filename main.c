@@ -53,7 +53,7 @@
 #include "functions.h"
 
 int main(void) {
-	//_delay_ms(500);
+	_delay_ms(500);
 	init_lcd_dog();							// Configures LCDs
 	
 	PORTB.DIRCLR |= PIN2_bm;				// Configures PB2 (On-board active low pushbutton) as an input
@@ -69,7 +69,7 @@ int main(void) {
 	sei();									// Enables global interrupts
 	
 	while (1) {
-		still_display();
+		//still_display();
 		asm volatile ("nop");
 	}
 	

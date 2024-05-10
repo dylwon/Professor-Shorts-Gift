@@ -24,9 +24,6 @@
 #include "functions.h"
 #include "DOGM163WA.h"
 
-extern char *names[];
-extern char message[];
-
 static char lcd0_buff[LINES][MAX_SIZE]; 
 static char lcd1_buff[LINES][MAX_SIZE];
 
@@ -147,13 +144,14 @@ void insert_split_msg(char* message) {
 			i--;
 			LCD_select = !LCD_select;
 			col = 0;	
+			lcd1_buff[lcd1_row][line_size - 1] = '\0';
 			lcd1_row++;
 			continue;
 		}
 		else // Puts character into right LCD
 			lcd1_buff[lcd1_row][col++] = message[i];
 		
-		if (col != 0 && !(col % 16)) { // Triggers every 16 iterations
+		if (col != 0 && !(col % 16)) { // Triggers on 16th column index
 			if (!LCD_select)
 				lcd0_buff[lcd0_row++][col] = '\0';
 			else
