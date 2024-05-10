@@ -233,6 +233,86 @@ void init_lcd_dog (void) {
 		lcd_spi_transmit_CMD(i, 0x06);	//clear display, cursor home & auto-increment
 		_delay_us(30);	//26.3us delay for command to be processed
 	
-	}
-	
+	}	
 }
+
+//***************************************************************************
+//
+// Function Name : void init_big_lcd_dog(void)
+// Date : 3/29/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong & Kenneth Short
+//
+// This function sends serial bytes to both of the DOG LCD to configure its settings.
+// Configuring the functionality of the display requires sending well timed
+// serial packets in the correct order and with the right delays. This specific
+// configuration makes the display one line with a large font. The buffers can only be
+// 8 characters long (9 with null space).
+//
+// Warnings : Ensure serial packets for initialization are sent in the right order, 
+//			  and proper delays are used in between the sent packets.
+// Restrictions : none
+// Algorithms : lcd_spi_transmit_CMD
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void init_big_lcd_dog (void) {
+	init_spi_lcd();		//Initialize MCU for SPI with both LCD displays
+	
+	for (uint8_t i = 0; i < 2; i++) {
+		//start_dly_40ms:
+		_delay_ms(40);	//40ms delay for command to be processed
+
+		//func_set1:
+		lcd_spi_transmit_CMD(i, 0x39);   // send function set #1
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//func_set2:
+		lcd_spi_transmit_CMD(i, 0x39);	//send function set #2
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//bias_set:
+		lcd_spi_transmit_CMD(i, 0x1E);	//set bias value.
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//power_ctrl:
+		lcd_spi_transmit_CMD(i, 0x55);	//~ 0x50 nominal for 5V
+		//~ 0x55 for 3.3V (delicate adjustment).
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//follower_ctrl:
+		lcd_spi_transmit_CMD(i, 0x6C);	//follower mode on...
+		_delay_ms(200);	//200ms delay for command to be processed
+
+
+		//contrast_set:
+		lcd_spi_transmit_CMD(i, 0x7F);	//~ 77 for 5V, ~ 7F for 3.3V
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//display_on:
+		lcd_spi_transmit_CMD(i, 0x0C);	//display on, cursor off, blink off
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//clr_display:
+		lcd_spi_transmit_CMD(i, 0x01);	//clear display, cursor home
+		_delay_us(30);	//26.3us delay for command to be processed
+
+
+		//entry_mode:
+		lcd_spi_transmit_CMD(i, 0x06);	//clear display, cursor home & auto-increment
+		_delay_us(30);	//26.3us delay for command to be processed
+	
+	}
+}
+

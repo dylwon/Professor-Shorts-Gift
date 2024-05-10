@@ -48,7 +48,7 @@
 //**************************************************************************
 #include <avr/interrupt.h>		
 
-#include "messages.h"																																
+#include "messages.h"																			
 #include "DOGM163WA.h"
 #include "functions.h"
 
@@ -64,12 +64,14 @@ int main(void) {
 	insert_split_names(names);
 	insert_split_msg(special_thanks);
 	
+	center_justify(lcd0_buff, lcd1_buff);
+	
 	still_display();
 	
 	sei();									// Enables global interrupts
 	
 	while (1) {
-		//still_display();
+		still_display();
 		asm volatile ("nop");
 	}
 	

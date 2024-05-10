@@ -27,12 +27,17 @@
 #define F_CPU 4000000LU
 #define LINES 100
 #define MAX_SIZE 17
-#define SCROLLSPEED 1000
+#define SCROLLSPEED 500
 
 #include <avr/io.h>
 #include <stdlib.h>
 #include <util/delay.h>
 #include <string.h>
+
+char lcd0_buff[LINES][MAX_SIZE];
+char lcd1_buff[LINES][MAX_SIZE];
+
+int lcd0_row, lcd1_row;
 
 //***************************************************************************
 //
@@ -130,6 +135,31 @@ void insert_split_msg(char* message);
 //**************************************************************************
 
 void insert_split_names(char** names);
+
+//***************************************************************************
+//
+// Function Name : center_justify(char** matrix0, char** matrix1)
+// Date : 5/10/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function takes two matrices and centers the strings across each of the rows
+//
+// Warnings : Full names can only fill a maximum of 33 characters. The
+//			  first and last name can fill a maximum of 16 characters each.
+//			  Make sure that the lcd0_buff and lcd1_buff have enough rows
+//			  to support the length of the message string
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void center_justify(char** matrix0, char** matrix1);
 
 //***************************************************************************
 //

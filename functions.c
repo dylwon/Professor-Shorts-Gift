@@ -24,10 +24,7 @@
 #include "functions.h"
 #include "DOGM163WA.h"
 
-static char lcd0_buff[LINES][MAX_SIZE]; 
-static char lcd1_buff[LINES][MAX_SIZE];
-
-static int lcd0_row = 0, lcd1_row = 0;
+extern int lcd0_row, lcd1_row = 0;
 
 //***************************************************************************
 //
@@ -57,7 +54,6 @@ void still_display(void) {
 	for (uint8_t i = 0; i < 2; i++) {							// Loop to write left/right LCD display
 		init_spi_lcd();
 		lcd_spi_transmit_CMD(i, 0x80);							// init DDRAM address counter
-		//lcd_spi_transmit_CMD(i, )
 		for (uint8_t j = 0; j < 3; j++) {						// Loop to write rows
 			_delay_us(30);
 			for (uint8_t k = 0; k < 16; k++) {					// Loop to write each character in the rows
@@ -123,12 +119,6 @@ int sizeof_matrix(char** matrix) {
 //************************************************************************** 
 
 void insert_split_msg(char* message) {
-	/*
-	if (lcd0_buff[lcd0_row] != NULL && lcd0_row != 0)
-		lcd1_row = ++lcd0_row;
-	if (lcd1_buff[lcd1_row] != NULL && lcd1_row != 0)
-		lcd0_row = ++lcd1_row;
-	*/
 		
 	uint8_t LCD_select = 0;
 	int line_size = sizeof_array(message);
@@ -190,12 +180,6 @@ void insert_split_msg(char* message) {
 //**************************************************************************
 
 void insert_split_names(char** names) {
-	/*
-	if (lcd0_buff[lcd0_row] != NULL && lcd0_row != 0)
-		lcd1_row = ++lcd0_row;
-	if (lcd1_buff[lcd1_row] != NULL && lcd1_row != 0)
-		lcd0_row = ++lcd1_row;
-	*/
 		
 	uint8_t line_size = 0;
 	for (uint8_t i = 0, tmp_size = 0; i < LINES; i++) {
@@ -236,7 +220,29 @@ void insert_split_names(char** names) {
 	}
 }
 
-/*
+//***************************************************************************
+//
+// Function Name : center_justify(char** matrix0, char** matrix1)
+// Date : 5/10/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function takes two matrices and centers the strings across each of the rows
+//
+// Warnings : Full names can only fill a maximum of 33 characters. The
+//			  first and last name can fill a maximum of 16 characters each.
+//			  Make sure that the lcd0_buff and lcd1_buff have enough rows
+//			  to support the length of the message string
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
 void center_justify(char** matrix0, char** matrix1) {
 	int count = 0;
 	
@@ -245,7 +251,6 @@ void center_justify(char** matrix0, char** matrix1) {
 			continue;
 			
 		for (uint8_t j = MAX_SIZE - 2; j > 0; j--) { // Starts at index that can have last possible character and counts whitespaces/nulls
-					
 			if (matrix1[i][j] != ' ' && matrix1[i][j] != '\0')
 				break;
 			matrix1[i][j] = ' ';							// Replaces any other null characters with spaces
@@ -266,9 +271,7 @@ void center_justify(char** matrix0, char** matrix1) {
 		}
 	}
 	
-	
 }
-*/
 
 //***************************************************************************
 //
