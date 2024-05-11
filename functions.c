@@ -24,7 +24,8 @@
 #include "functions.h"
 #include "DOGM163WA.h"
 
-extern int lcd0_row, lcd1_row = 0;
+extern int lcd0_row = 0;
+extern int lcd1_row = 0;
 
 //***************************************************************************
 //
@@ -207,7 +208,7 @@ void insert_split_names(char** names) {
 		lcd0_buff[lcd0_row++][MAX_SIZE - 1] = '\0';
 		
 		for (uint8_t j = 0, brk = 1; j < MAX_SIZE; j++) {	
-			if (names[i][space + j + 1] != NULL && brk)		
+			if (names[i][space + j + 1] != '\0' && brk)		
 				lcd1_buff[lcd1_row][j] = names[i][space + j + 1];
 			else {
 				brk = 0;
@@ -327,7 +328,7 @@ void center_justify(void) {
 void down_scroll_display(void) {
 	
 	for (uint8_t i = 0; i < LINES; i++) {							// Loop for number of down scrolls
-		if (lcd0_buff[i][0] == NULL || lcd1_buff[i][0] == NULL) break;
+		if (lcd0_buff[i][0] == '\0' || lcd1_buff[i][0] == '\0') break;
 		for (uint8_t j = 0; j < 2; j++) {							// Loop to write left/right LCD display
 			init_spi_lcd();
 			lcd_spi_transmit_CMD(j, 0x80);							// init DDRAM address counter

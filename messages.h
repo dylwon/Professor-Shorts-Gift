@@ -24,9 +24,9 @@
 #define MESSAGES_H_
 
 char *names[33] = {
+	"Dylan Wong",
 	"Stanley Cokro",
 	"Nisat Nosin",
-	"Dylan Wong",
 	"Luke Melfa",
 	"Eric Yang",
 	"Farhaan Khan",
