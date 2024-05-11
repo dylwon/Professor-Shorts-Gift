@@ -222,7 +222,7 @@ void insert_split_names(char** names) {
 
 //***************************************************************************
 //
-// Function Name : center_justify(char** matrix0, char** matrix1)
+// Function Name : center_justify()
 // Date : 5/10/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -243,31 +243,32 @@ void insert_split_names(char** names) {
 //
 //**************************************************************************
 
-void center_justify(char** matrix0, char** matrix1) {
+void center_justify() {
 	int count = 0;
 	
 	for (uint8_t i = 0; i < LINES; i++) {
-		if (matrix0[lcd0_row][0] == ' ') // Skips if it's not a left-justified message
+		if (!strlen(lcd0_buff[i])) break;
+		if (lcd0_buff[i][0] == ' ') // Skips if it's not a left-justified message
 			continue;
 			
 		for (uint8_t j = MAX_SIZE - 2; j > 0; j--) { // Starts at index that can have last possible character and counts whitespaces/nulls
-			if (matrix1[i][j] != ' ' && matrix1[i][j] != '\0')
+			if (lcd1_buff[i][j] != ' ' && lcd1_buff[i][j] != '\0')
 				break;
-			matrix1[i][j] = ' ';							// Replaces any other null characters with spaces
+			lcd1_buff[i][j] = ' ';							// Replaces any other null characters with spaces
 			count++;
 		}
 		
-		for (uint8_t j = 0; j < count/2; j++) {
-			for (uint8_t k = MAX_SIZE - 2; k > 1; k--) {	// Shifts all contents of matrix1 to the right by 1
-				matrix1[i][k] = matrix1[i][k - 1];
-				//memmove(&matrix1[i][j + 1], &matrix1[i][j], (MAX_SIZE - j - 1) * sizeof(uint8_t));
+		for (uint8_t j = 0; j < (count - 1)/2; j++) {
+			for (uint8_t k = MAX_SIZE - 2; k > 0; k--) {	// Shifts all contents of matrix1 to the right by 1
+				lcd1_buff[i][k] = lcd1_buff[i][k - 1];
 			}
 			
-			matrix1[i][0] = matrix0[i][MAX_SIZE - 2];				// First index of matrix1 gets the rolled over value of matrix0
+			lcd1_buff[i][0] = lcd0_buff[i][MAX_SIZE - 2];				// First index of matrix1 gets the rolled over value of matrix0
 			
-			for (uint8_t k = MAX_SIZE - 2; k > 1; k--) {	// Shifts all contents of matrix0 to the right by 1
-				matrix0[i][k] = matrix0[i][k - 1];
+			for (uint8_t k = MAX_SIZE - 2; k > 0; k--) {	// Shifts all contents of matrix0 to the right by 1
+				lcd0_buff[i][k] = lcd0_buff[i][k - 1];
 			}
+			lcd0_buff[i][0] = ' ';
 		}
 	}
 	

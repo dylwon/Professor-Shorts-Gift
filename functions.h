@@ -138,7 +138,7 @@ void insert_split_names(char** names);
 
 //***************************************************************************
 //
-// Function Name : center_justify(char** matrix0, char** matrix1)
+// Function Name : center_justify()
 // Date : 5/10/2024
 // Version : 1.0
 // Target MCU : AVR128DB48
@@ -159,7 +159,7 @@ void insert_split_names(char** names);
 //
 //**************************************************************************
 
-void center_justify(char** matrix0, char** matrix1);
+void center_justify();
 
 //***************************************************************************
 //
