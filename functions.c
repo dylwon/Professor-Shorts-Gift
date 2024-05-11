@@ -119,7 +119,6 @@ int sizeof_matrix(char** matrix) {
 //************************************************************************** 
 
 void insert_split_msg(char* message) {
-		
 	uint8_t LCD_select = 0;
 	int line_size = sizeof_array(message);
 	for (int i = 0, col = 0; i < line_size; i++) {
@@ -222,6 +221,31 @@ void insert_split_names(char** names) {
 
 //***************************************************************************
 //
+// Function Name : void insert_newline(void)
+// Date : 5/11/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function adds a new line onto both lcd_buffs
+//
+// Warnings : 
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void insert_newline(void) {
+	strcpy(lcd0_buff[lcd0_row++], "                ");
+	strcpy(lcd1_buff[lcd1_row++], "                ");
+}
+
+//***************************************************************************
+//
 // Function Name : center_justify()
 // Date : 5/10/2024
 // Version : 1.0
@@ -243,14 +267,14 @@ void insert_split_names(char** names) {
 //
 //**************************************************************************
 
-void center_justify() {
-	int count = 0;
+void center_justify(void) {
+	uint8_t count;
 	
 	for (uint8_t i = 0; i < LINES; i++) {
-		if (!strlen(lcd0_buff[i])) break;
-		if (lcd0_buff[i][0] == ' ') // Skips if it's not a left-justified message
+		if (lcd0_buff[i][0] == ' ' || !strlen(lcd0_buff[i])) // Skips if it's not a left-justified message or an empty message
 			continue;
 			
+		count = 0;
 		for (uint8_t j = MAX_SIZE - 2; j > 0; j--) { // Starts at index that can have last possible character and counts whitespaces/nulls
 			if (lcd1_buff[i][j] != ' ' && lcd1_buff[i][j] != '\0')
 				break;
@@ -258,7 +282,7 @@ void center_justify() {
 			count++;
 		}
 		
-		for (uint8_t j = 0; j < (count - 1)/2; j++) {
+		for (uint8_t j = 0; j < (count)/2; j++) {
 			for (uint8_t k = MAX_SIZE - 2; k > 0; k--) {	// Shifts all contents of matrix1 to the right by 1
 				lcd1_buff[i][k] = lcd1_buff[i][k - 1];
 			}
@@ -321,4 +345,28 @@ void down_scroll_display(void) {
 		_delay_ms(SCROLLSPEED);
 	}
 	_delay_ms(1000);
+}
+
+//***************************************************************************
+//
+// Function Name : repeat(void* func(void), int n)
+// Date : 5/11/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function repeats the specified function for n amount of times
+//
+// Warnings : none
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void repeat(void* func(void), int n) {
+	for (uint8_t i = 0; i < n; i++) func();
 }

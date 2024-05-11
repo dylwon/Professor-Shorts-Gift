@@ -138,6 +138,28 @@ void insert_split_names(char** names);
 
 //***************************************************************************
 //
+// Function Name : void insert_newline(void)
+// Date : 5/11/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function adds a new line onto both lcd_buffs
+//
+// Warnings :
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void insert_newline(void);
+
+//***************************************************************************
+//
 // Function Name : center_justify()
 // Date : 5/10/2024
 // Version : 1.0
@@ -188,6 +210,28 @@ void center_justify();
 //**************************************************************************
 
 void down_scroll_display(void);
+
+//***************************************************************************
+//
+// Function Name : repeat(void* func(void), int n)
+// Date : 5/11/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong
+//
+// This function repeats the specified function for n amount of times
+//
+// Warnings : none
+// Restrictions : none
+// Algorithms : sizeof_array
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void repeat(void* func(void), int n);
 
 
 #endif /* FUNCTIONS_H_ */

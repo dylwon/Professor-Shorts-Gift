@@ -53,18 +53,21 @@
 #include "functions.h"
 
 int main(void) {
-	/*
-	_delay_ms(500);
+	//_delay_ms(500);
 	init_lcd_dog();							// Configures LCDs
 	
 	PORTB.DIRCLR |= PIN2_bm;				// Configures PB2 (On-board active low pushbutton) as an input
 	PORTB.PIN2CTRL |= PIN0_bm | PIN1_bm;	// Enables Interrupt on falling edge 
 	PORTB.INTFLAGS |= PIN2_bm;				// Clears the Interrupt flag on PB2
-	*/
 	
 	insert_split_msg(message);
+	repeat(insert_newline, 3);
+	
 	insert_split_names(names);
+	repeat(insert_newline, 3);
+	
 	insert_split_msg(special_thanks);
+	repeat(insert_newline, 3);
 	
 	center_justify(lcd0_buff, lcd1_buff);
 	

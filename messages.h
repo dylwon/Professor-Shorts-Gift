@@ -56,12 +56,6 @@ char message[] = {
 	"Thank you for teaching us, through good health and sickness, you've always been there and we appreciate you. We hope you get better soon"
 };
 
-/*
-char two_lines[] = {
-	"                                                                "
-};
-*/
-
 char special_thanks[] = {
 	"Special Thanks to Bryant Gonzaga for organizing this student project"
 };
