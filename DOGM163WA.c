@@ -269,12 +269,12 @@ void init_big_lcd_dog (void) {
 		_delay_ms(40);	//40ms delay for command to be processed
 
 		//func_set1:
-		lcd_spi_transmit_CMD(i, 0x39);   // send function set #1
+		lcd_spi_transmit_CMD(i, 0x30);   // send function set #1
 		_delay_us(30);	//26.3us delay for command to be processed
 
 
 		//func_set2:
-		lcd_spi_transmit_CMD(i, 0x39);	//send function set #2
+		lcd_spi_transmit_CMD(i, 0x30);	//send function set #2
 		_delay_us(30);	//26.3us delay for command to be processed
 
 

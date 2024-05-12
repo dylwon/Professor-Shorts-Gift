@@ -231,7 +231,7 @@ void down_scroll_display(void);
 //
 //**************************************************************************
 
-void repeat(void* func(void), int n);
+void repeat(void func(void), int n);
 
 
 #endif /* FUNCTIONS_H_ */

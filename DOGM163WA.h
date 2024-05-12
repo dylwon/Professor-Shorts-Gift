@@ -143,5 +143,32 @@ void init_spi_lcd (void);
 
 void init_lcd_dog (void);
 
+//***************************************************************************
+//
+// Function Name : void init_big_lcd_dog(void)
+// Date : 3/29/2024
+// Version : 1.0
+// Target MCU : AVR128DB48
+// Target Hardware : AVR128DB48
+// Author : Dylan Wong & Kenneth Short
+//
+// This function sends serial bytes to both of the DOG LCD to configure its settings.
+// Configuring the functionality of the display requires sending well timed
+// serial packets in the correct order and with the right delays. This specific
+// configuration makes the display one line with a large font. The buffers can only be
+// 8 characters long (9 with null space).
+//
+// Warnings : Ensure serial packets for initialization are sent in the right order, 
+//			  and proper delays are used in between the sent packets.
+// Restrictions : none
+// Algorithms : lcd_spi_transmit_CMD
+// References : none
+//
+// Revision History : Initial version
+//
+//**************************************************************************
+
+void init_big_lcd_dog (void);
+
 
 #endif /* DOGM163WA_H_ */

@@ -24,8 +24,8 @@
 #include "functions.h"
 #include "DOGM163WA.h"
 
-extern int lcd0_row = 0;
-extern int lcd1_row = 0;
+int lcd0_row = 0;
+int lcd1_row = 0;
 
 //***************************************************************************
 //
@@ -368,6 +368,6 @@ void down_scroll_display(void) {
 //
 //**************************************************************************
 
-void repeat(void* func(void), int n) {
+void repeat(void func(void), int n) {
 	for (uint8_t i = 0; i < n; i++) func();
 }
